@@ -2,3 +2,4 @@ together
 Django>=4.2
 python-decouple
 supermemory
+gunicorn
