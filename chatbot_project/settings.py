@@ -1,5 +1,6 @@
 """
 Django settings for chatbot_project project.
+Configured for Railway deployment with PostgreSQL.
 """
 
 from pathlib import Path
@@ -17,7 +18,9 @@ except ImportError:
     def get_env(key, default=None, cast=None):
         value = os.environ.get(key, default)
         if cast is bool:
-            return value.lower() in ('true', '1', 'yes', 'on') if value else False
+            if isinstance(value, bool):
+                return value
+            return str(value).lower() in ('true', '1', 'yes', 'on') if value else False
         return value
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,9 +30,24 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = get_env('SECRET_KEY', default='django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env('DEBUG', default=True, cast=bool)
+DEBUG = get_env('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = []
+# Allowed hosts - Railway provides RAILWAY_PUBLIC_DOMAIN
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
+# Add Railway domain if available
+RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
+if RAILWAY_PUBLIC_DOMAIN:
+    ALLOWED_HOSTS.append(RAILWAY_PUBLIC_DOMAIN)
+
+# Add custom domain if provided
+CUSTOM_DOMAIN = get_env('CUSTOM_DOMAIN', default='')
+if CUSTOM_DOMAIN:
+    ALLOWED_HOSTS.append(CUSTOM_DOMAIN)
+
+# Allow all hosts if specified (not recommended for production)
+if get_env('ALLOW_ALL_HOSTS', default=False, cast=bool):
+    ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -46,6 +64,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # Whitenoise for static files
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -78,12 +97,27 @@ WSGI_APPLICATION = 'chatbot_project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+# Check for DATABASE_URL (Railway provides this)
+DATABASE_URL = os.environ.get('DATABASE_URL')
+
+if DATABASE_URL:
+    # Use PostgreSQL on Railway
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.config(
+            default=DATABASE_URL,
+            conn_max_age=600,
+            conn_health_checks=True,
+        )
     }
-}
+else:
+    # Use SQLite for local development
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -128,6 +162,9 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
+# Whitenoise configuration for serving static files in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
 # Media files
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
@@ -151,3 +188,18 @@ ROLES_JSON_FILE = BASE_DIR / 'AI_Role_Player_System_Prompts_Formatted.json'
 SUPERMEMORY_API_KEY = get_env('SUPERMEMORY_API_KEY', default='')
 SUPERMEMORY_ENABLED = get_env('SUPERMEMORY_ENABLED', default=True, cast=bool)
 
+# CSRF Trusted Origins for Railway
+CSRF_TRUSTED_ORIGINS = []
+
+if RAILWAY_PUBLIC_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{RAILWAY_PUBLIC_DOMAIN}')
+
+if CUSTOM_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.append(f'https://{CUSTOM_DOMAIN}')
+
+# Security settings for production
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True

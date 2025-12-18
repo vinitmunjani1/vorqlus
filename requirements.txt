@@ -3,3 +3,6 @@ Django>=4.2
 python-decouple
 supermemory
 gunicorn
+psycopg2-binary
+whitenoise
+dj-database-url
