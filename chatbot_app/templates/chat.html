@@ -54,9 +54,7 @@
                 {% for message in chat_history %}
                 <div class="message {{ message.role }}">
                     <div>
-                        <div class="message-bubble">
-                            {{ message.content|linebreaksbr }}
-                        </div>
+                        <div class="message-bubble">{{ message.content|linebreaksbr }}</div>
                         <div class="message-time">
                             {{ message.timestamp|date:"H:i" }}
                         </div>
