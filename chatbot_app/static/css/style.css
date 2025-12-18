@@ -674,15 +674,52 @@ a:hover {
 /* Responsive */
 @media (max-width: 768px) {
     main {
-        padding: 1rem;
+        padding: 0.5rem; /* Reduced padding for mobile */
     }
     
     .message-bubble {
-        max-width: 85%;
+        max-width: 92%; /* Use more width on mobile */
     }
     
+    .message > div {
+        max-width: 85%; /* allow message container to be wider */
+    }
+
     .card {
         margin-bottom: 1rem;
+    }
+    
+    .chat-container {
+        height: calc(100vh - 140px); /* Taller chat area on mobile */
+        min-height: 400px;
+    }
+    
+    h2 {
+        font-size: 1.2rem; /* Smaller title */
+        margin-bottom: 1rem;
+    }
+    
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 0.8rem; /* Smaller buttons */
+    }
+}
+
+@media (max-width: 576px) {
+    .hide-text-mobile {
+        display: none;
+    }
+    
+    .chat-messages {
+        padding: 10px;
+    }
+    
+    .message-bubble {
+        font-size: 0.9rem;
+        padding: 8px 10px;
     }
 }
 
