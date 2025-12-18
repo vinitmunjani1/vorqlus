@@ -51,7 +51,7 @@
 
         <div class="card shadow chat-container">
             <div class="chat-messages" id="chat-messages">
-                {% for message in messages %}
+                {% for message in chat_history %}
                 <div class="message {{ message.role }}">
                     <div>
                         <div class="message-bubble">
@@ -131,7 +131,8 @@
     // Initialize chat for this conversation
     document.addEventListener('DOMContentLoaded', function () {
         console.log('DOM loaded, initializing chat');
-        const conversationId = {{ conversation.id }};
+        const conversationId = {{ conversation.id }
+    };
     console.log('Conversation ID:', conversationId);
 
     if (typeof initializeChat === 'function') {

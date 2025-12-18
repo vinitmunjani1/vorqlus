@@ -175,7 +175,7 @@ def chat_view(request, conversation_id):
     
     context = {
         'conversation': conversation,
-        'messages': conversation_messages,
+        'chat_history': conversation_messages,
         'ai_roles': ai_roles,
         'form': MessageForm(),
     }
