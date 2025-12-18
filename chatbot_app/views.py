@@ -24,6 +24,14 @@ from .supermemory_service import (
 )
 
 
+def health_check(request):
+    """
+    Health check endpoint for Railway.
+    Returns a simple 200 OK response.
+    """
+    return JsonResponse({'status': 'ok', 'message': 'Vorqlus is running!'})
+
+
 def register_view(request):
     """
     Handle user registration.
