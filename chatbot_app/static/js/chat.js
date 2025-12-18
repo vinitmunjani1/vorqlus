@@ -15,17 +15,20 @@ function initializeChat(convId) {
     // Check if elements exist
     if (!chatMessages || !messageForm || !messageInput) {
         console.error('Chat elements not found');
+        alert('Error: Chat elements not found. Please refresh the page.');
         return;
     }
+
+    console.log('Chat initialized successfully for conversation', convId);
 
     // Auto-scroll to bottom on load
     scrollToBottom();
 
     // Handle form submission
-    messageForm.addEventListener('submit', async function(e) {
+    messageForm.addEventListener('submit', async function (e) {
         e.preventDefault();
         console.log('Form submitted'); // Debug log
-        
+
         const message = messageInput.value.trim();
         if (!message) {
             console.log('Empty message, returning');
@@ -49,7 +52,19 @@ function initializeChat(convId) {
 
         try {
             // Send message to server
-            const csrfToken = getCookie('csrftoken');
+            let csrfToken = null;
+
+            // Try to get from hidden input first (more reliable)
+            const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfInput) {
+                csrfToken = csrfInput.value;
+            }
+
+            // Fallback to cookie
+            if (!csrfToken) {
+                csrfToken = getCookie('csrftoken');
+            }
+
             if (!csrfToken) {
                 throw new Error('CSRF token not found');
             }
@@ -84,12 +99,12 @@ function initializeChat(convId) {
         } finally {
             // Hide loading indicator
             loadingIndicator.classList.remove('active');
-            
+
             // Re-enable input and button
             messageInput.disabled = false;
             sendButton.disabled = false;
             messageInput.focus();
-            
+
             scrollToBottom();
         }
     });
@@ -98,7 +113,7 @@ function initializeChat(convId) {
     messageInput.focus();
 
     // Handle Enter key to send message, Shift+Enter for new line
-    messageInput.addEventListener('keydown', function(e) {
+    messageInput.addEventListener('keydown', function (e) {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault(); // Prevent default new line
             if (!sendButton.disabled && messageInput.value.trim()) {
@@ -112,26 +127,26 @@ function initializeChat(convId) {
 function addMessageToChat(role, content) {
     console.log('Adding message:', role, content); // Debug log
     const chatMessages = document.getElementById('chat-messages');
-    
+
     if (!chatMessages) {
         console.error('chat-messages element not found');
         return;
     }
-    
+
     // Remove empty state message if it exists
     const emptyState = chatMessages.querySelector('#empty-state') || chatMessages.querySelector('.text-center.text-muted');
     if (emptyState) {
         console.log('Removing empty state');
         emptyState.remove();
     }
-    
+
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${role}`;
-    
+
     const now = new Date();
-    const timeString = now.toLocaleTimeString('en-US', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+    const timeString = now.toLocaleTimeString('en-US', {
+        hour: '2-digit',
+        minute: '2-digit'
     });
 
     // Escape HTML and convert line breaks to <br> tags
@@ -161,7 +176,7 @@ function addMessageToChat(role, content) {
     } else {
         chatMessages.appendChild(messageDiv);
     }
-    
+
     console.log('Message added to DOM'); // Debug log
     scrollToBottom();
 }
