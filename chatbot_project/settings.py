@@ -32,8 +32,8 @@ SECRET_KEY = get_env('SECRET_KEY', default='django-insecure-change-this-in-produ
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env('DEBUG', default=True, cast=bool)
 
-# Allowed hosts - Railway provides RAILWAY_PUBLIC_DOMAIN
-ALLOWED_HOSTS = ['vorqlus-production.up.railway.app', '127.0.0.1']
+# Allowed hosts - Allow all for Railway to ensure health checks pass
+ALLOWED_HOSTS = ['*']
 
 # Add Railway domain if available
 RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
