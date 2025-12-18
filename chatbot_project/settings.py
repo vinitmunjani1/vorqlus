@@ -188,9 +188,10 @@ ROLES_JSON_FILE = BASE_DIR / 'AI_Role_Player_System_Prompts_Formatted.json'
 # Supermemory Configuration
 SUPERMEMORY_API_KEY = get_env('SUPERMEMORY_API_KEY', default='')
 SUPERMEMORY_ENABLED = get_env('SUPERMEMORY_ENABLED', default=True, cast=bool)
+SUPERMEMORY_NAMESPACE = get_env('SUPERMEMORY_NAMESPACE', default='production' if RAILWAY_PUBLIC_DOMAIN else 'local')
 
 # CSRF Trusted Origins for Railway
-CSRF_TRUSTED_ORIGINS = []
+CSRF_TRUSTED_ORIGINS = ['https://vorqlus.up.railway.app']
 
 if RAILWAY_PUBLIC_DOMAIN:
     CSRF_TRUSTED_ORIGINS.append(f'https://{RAILWAY_PUBLIC_DOMAIN}')

@@ -5,6 +5,7 @@ Database models for the chatbot application.
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from .models_profile import UserProfile
 
 
 class AIRole(models.Model):

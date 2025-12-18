@@ -55,24 +55,42 @@ def get_client():
     return initialize_supermemory_client()
 
 
-def _get_user_container_tag(user_id):
     """Get container tag for user-specific memories."""
-    return f"user_{user_id}"
+    namespace = getattr(settings, 'SUPERMEMORY_NAMESPACE', 'default')
+    # Use UUID from profile if available, fallback to ID
+    try:
+        user_identifier = str(User.objects.get(id=user_id).userprofile.uuid)
+    except Exception:
+        user_identifier = str(user_id)
+        
+    return f"{namespace}_user_{user_identifier}"
 
 
-def _get_conversation_container_tag(user_id, conversation_id):
     """Get container tag for conversation-specific memories."""
-    return f"user_{user_id}_conv_{conversation_id}"
+    namespace = getattr(settings, 'SUPERMEMORY_NAMESPACE', 'default')
+    # Use UUID from profile if available, fallback to ID
+    try:
+        user_identifier = str(User.objects.get(id=user_id).userprofile.uuid)
+    except Exception:
+        user_identifier = str(user_id)
+
+    return f"{namespace}_user_{user_identifier}_conv_{conversation_id}"
 
 
-def _get_preferences_container_tag(user_id):
     """Get container tag for user preferences."""
-    return f"user_{user_id}_prefs"
+    namespace = getattr(settings, 'SUPERMEMORY_NAMESPACE', 'default')
+    try:
+        user_identifier = str(User.objects.get(id=user_id).userprofile.uuid)
+    except Exception:
+        user_identifier = str(user_id)
+
+    return f"{namespace}_user_{user_identifier}_prefs"
 
 
 def _get_role_container_tag(role_id):
     """Get container tag for role-specific knowledge."""
-    return f"role_{role_id}"
+    namespace = getattr(settings, 'SUPERMEMORY_NAMESPACE', 'default')
+    return f"{namespace}_role_{role_id}"
 
 
 def store_conversation_memory(user, conversation, message, role='user'):
