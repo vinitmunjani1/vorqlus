@@ -30,7 +30,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = get_env('SECRET_KEY', default='django-insecure-change-this-in-production')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = get_env('DEBUG', default=False, cast=bool)
+DEBUG = get_env('DEBUG', default=True, cast=bool)
 
 # Allowed hosts - Railway provides RAILWAY_PUBLIC_DOMAIN
 ALLOWED_HOSTS = ['vorqlus-production.up.railway.app', '127.0.0.1']
