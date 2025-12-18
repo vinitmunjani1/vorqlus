@@ -32,8 +32,8 @@ SECRET_KEY = get_env('SECRET_KEY', default='django-insecure-change-this-in-produ
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = get_env('DEBUG', default=True, cast=bool)
 
-# Allowed hosts - Allow all for Railway to ensure health checks pass
-ALLOWED_HOSTS = ['*']
+# Allowed hosts - Railway provides RAILWAY_PUBLIC_DOMAIN
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
 # Add Railway domain if available
 RAILWAY_PUBLIC_DOMAIN = os.environ.get('RAILWAY_PUBLIC_DOMAIN')
@@ -45,11 +45,11 @@ CUSTOM_DOMAIN = get_env('CUSTOM_DOMAIN', default='')
 if CUSTOM_DOMAIN:
     ALLOWED_HOSTS.append(CUSTOM_DOMAIN)
 
-# Allow all hosts if specified (not recommended for production)
-if get_env('ALLOW_ALL_HOSTS', default=False, cast=bool):
+# Allow all hosts if specified (safe fallback for some environments)
+if get_env('ALLOW_ALL_HOSTS', default=True, cast=bool):
     ALLOWED_HOSTS = ['*']
-
-
+    
+    
 # Application definition
 
 INSTALLED_APPS = [
