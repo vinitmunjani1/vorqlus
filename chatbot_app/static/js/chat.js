@@ -15,11 +15,8 @@ function initializeChat(convId) {
     // Check if elements exist
     if (!chatMessages || !messageForm || !messageInput) {
         console.error('Chat elements not found');
-        alert('Error: Chat elements not found. Please refresh the page.');
         return;
     }
-
-    console.log('Chat initialized successfully for conversation', convId);
 
     // Auto-scroll to bottom on load
     scrollToBottom();
@@ -52,19 +49,7 @@ function initializeChat(convId) {
 
         try {
             // Send message to server
-            let csrfToken = null;
-
-            // Try to get from hidden input first (more reliable)
-            const csrfInput = document.querySelector('[name=csrfmiddlewaretoken]');
-            if (csrfInput) {
-                csrfToken = csrfInput.value;
-            }
-
-            // Fallback to cookie
-            if (!csrfToken) {
-                csrfToken = getCookie('csrftoken');
-            }
-
+            const csrfToken = getCookie('csrftoken');
             if (!csrfToken) {
                 throw new Error('CSRF token not found');
             }
