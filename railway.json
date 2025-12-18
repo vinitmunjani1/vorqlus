@@ -5,7 +5,7 @@
   },
   "deploy": {
     "startCommand": "python manage.py migrate && python manage.py collectstatic --noinput && gunicorn chatbot_project.wsgi --bind 0.0.0.0:$PORT",
-    "healthcheckPath": "/health/",
+    "healthcheckPath": "",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10
   }
