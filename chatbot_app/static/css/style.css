@@ -678,11 +678,11 @@ a:hover {
     }
     
     .message-bubble {
-        max-width: 92%; /* Use more width on mobile */
+        max-width: 100%; /* Use more width on mobile */
     }
     
     .message > div {
-        max-width: 85%; /* allow message container to be wider */
+        max-width: 100%; /* allow message container to be wider */
     }
 
     .card {
