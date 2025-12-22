@@ -1,0 +1,634 @@
+{% extends 'base.html' %}
+
+{% block title %}Vorqlus - The Future of AI Interaction{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Global Styles for Landing */
+    body {
+        overflow-x: hidden;
+    }
+
+    /* Hero Section */
+    .hero-section {
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        position: relative;
+        padding-top: 60px;
+        /* Offset for navbar */
+        margin-top: -60px;
+    }
+
+    .hero-bg-glow {
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, rgba(118, 75, 162, 0.25) 0%, rgba(0, 0, 0, 0) 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+        z-index: 0;
+        animation: pulseGlow 5s infinite alternate;
+    }
+
+    @keyframes pulseGlow {
+        0% {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 0.5;
+        }
+
+        100% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.8;
+        }
+    }
+
+    .hero-content {
+        z-index: 2;
+        max-width: 900px;
+        padding: 0 1rem;
+    }
+
+    .hero-badge {
+        display: inline-block;
+        padding: 0.5rem 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        color: var(--neon-blue);
+        margin-bottom: 2rem;
+        backdrop-filter: blur(5px);
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        animation: fadeInDown 1s ease-out;
+    }
+
+    .hero-title {
+        font-size: 5rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 1.5rem;
+        letter-spacing: -2px;
+        background: linear-gradient(to right, #ffffff, #a5b4fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        animation: fadeInUp 1s ease-out 0.2s backwards;
+    }
+
+    .hero-accent {
+        background: var(--primary-gradient);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        position: relative;
+    }
+
+    .hero-accent::after {
+        content: '';
+        position: absolute;
+        left: 0;
+        bottom: 10px;
+        width: 100%;
+        height: 10px;
+        background: var(--primary-gradient);
+        opacity: 0.3;
+        filter: blur(10px);
+        z-index: -1;
+    }
+
+    .hero-subtitle {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.7);
+        max-width: 600px;
+        margin: 0 auto 3rem;
+        line-height: 1.6;
+        font-weight: 300;
+        animation: fadeInUp 1s ease-out 0.4s backwards;
+    }
+
+    .cta-buttons {
+        display: flex;
+        gap: 1.5rem;
+        justify-content: center;
+        animation: fadeInUp 1s ease-out 0.6s backwards;
+    }
+
+    .btn-hero {
+        padding: 1rem 3rem;
+        font-size: 1.1rem;
+        border-radius: 50px;
+        font-weight: 600;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .btn-hero:hover {
+        transform: translateY(-5px);
+    }
+
+    /* Scroll Indicator */
+    .scroll-indicator {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: rgba(255, 255, 255, 0.5);
+        animation: bounce 2s infinite;
+        font-size: 1.5rem;
+        cursor: pointer;
+        z-index: 10;
+    }
+
+    @keyframes bounce {
+
+        0%,
+        20%,
+        50%,
+        80%,
+        100% {
+            transform: translate(-50%, 0);
+        }
+
+        40% {
+            transform: translate(-50%, -10px);
+        }
+
+        60% {
+            transform: translate(-50%, -5px);
+        }
+    }
+
+    /* Features Section */
+    .section {
+        padding: 8rem 0;
+        position: relative;
+    }
+
+    .section-title {
+        text-align: center;
+        font-size: 2.5rem;
+        margin-bottom: 4rem;
+        font-weight: 700;
+    }
+
+    .section-bg-accent {
+        background: linear-gradient(180deg, transparent, rgba(102, 126, 234, 0.05), transparent);
+    }
+
+    .feature-grid-detailed {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: 3rem;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 2rem;
+    }
+
+    .feature-card-detailed {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        border-radius: 24px;
+        padding: 2.5rem;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feature-card-detailed:hover {
+        background: rgba(255, 255, 255, 0.05);
+        border-color: rgba(102, 126, 234, 0.3);
+        transform: translateY(-10px);
+    }
+
+    .feature-icon-wrapper {
+        width: 70px;
+        height: 70px;
+        background: rgba(102, 126, 234, 0.1);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 2rem;
+        font-size: 2rem;
+        color: var(--neon-blue);
+    }
+
+    .feature-card-detailed:nth-child(2) .feature-icon-wrapper {
+        background: rgba(176, 38, 255, 0.1);
+        color: var(--neon-purple);
+    }
+
+    .feature-card-detailed:nth-child(3) .feature-icon-wrapper {
+        background: rgba(255, 0, 110, 0.1);
+        color: var(--neon-pink);
+    }
+
+    .feature-card-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #fff;
+    }
+
+    .feature-card-text {
+        color: rgba(255, 255, 255, 0.6);
+        line-height: 1.7;
+    }
+
+    /* How it Works */
+    .steps-container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 2rem;
+        position: relative;
+    }
+
+    .steps-line {
+        position: absolute;
+        left: 50%;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: linear-gradient(to bottom, transparent, var(--neon-blue), transparent);
+        transform: translateX(-50%);
+    }
+
+    .step-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 4rem;
+        position: relative;
+    }
+
+    .step-item:nth-child(even) {
+        flex-direction: row-reverse;
+    }
+
+    .step-content {
+        width: 45%;
+        background: var(--glass-bg);
+        backdrop-filter: blur(10px);
+        padding: 2rem;
+        border-radius: 20px;
+        border: 1px solid var(--glass-border);
+    }
+
+    .step-number {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--dark-bg);
+        border: 2px solid var(--neon-blue);
+        color: var(--neon-blue);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 800;
+        font-size: 1.2rem;
+        z-index: 2;
+        margin: 0 2.5rem;
+        box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+    }
+
+    .step-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: #fff;
+    }
+
+    .step-text {
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    /* Stats Section */
+    .stats-section {
+        display: flex;
+        justify-content: center;
+        gap: 4rem;
+        margin-top: 4rem;
+        flex-wrap: wrap;
+    }
+
+    .stat-item {
+        text-align: center;
+    }
+
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, var(--neon-blue));
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: rgba(255, 255, 255, 0.5);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    /* Footer */
+    footer {
+        background: rgba(5, 7, 20, 0.95);
+        border-top: 1px solid var(--glass-border);
+        padding: 4rem 2rem 2rem;
+        margin-top: 4rem;
+    }
+
+    .footer-content {
+        max-width: 1200px;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 3rem;
+    }
+
+    .footer-brand {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        display: block;
+        color: #fff;
+    }
+
+    .footer-text {
+        color: rgba(255, 255, 255, 0.4);
+        line-height: 1.6;
+    }
+
+    .footer-links h4 {
+        color: #fff;
+        font-size: 1.1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .footer-links ul {
+        list-style: none;
+        padding: 0;
+    }
+
+    .footer-links li {
+        margin-bottom: 0.8rem;
+    }
+
+    .footer-links a {
+        color: rgba(255, 255, 255, 0.5);
+        transition: color 0.3s;
+    }
+
+    .footer-links a:hover {
+        color: var(--neon-blue);
+    }
+
+    .copyright {
+        text-align: center;
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.05);
+        color: rgba(255, 255, 255, 0.3);
+        font-size: 0.9rem;
+    }
+
+    /* Animations */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes fadeInDown {
+        from {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 3rem;
+        }
+
+        .steps-line {
+            left: 20px;
+            transform: none;
+        }
+
+        .step-item,
+        .step-item:nth-child(even) {
+            flex-direction: row;
+            justify-content: flex-start;
+        }
+
+        .step-number {
+            margin: 0 1rem 0 0;
+            min-width: 50px;
+        }
+
+        .step-content {
+            width: calc(100% - 70px);
+        }
+
+        .feature-grid-detailed {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="position-relative">
+    <!-- Hero Section -->
+    <div class="hero-section">
+        <div class="hero-bg-glow"></div>
+
+        <div class="hero-content">
+            <div class="hero-badge">Alpha Access Available</div>
+            <h1 class="hero-title">Your Second Brain <br>Powered by <span class="hero-accent">Intelligent AI</span></h1>
+            <p class="hero-subtitle">
+                Vorqlus isn't just a chatbot. It's a persistent, memory-enhanced AI companion that evolves with you.
+                Switch personas instantly, solve complex problems, and never lose context again.
+            </p>
+
+            <div class="cta-buttons">
+                <a href="{% url 'register' %}" class="btn btn-hero btn-primary text-white">Get Started</a>
+                <a href="{% url 'login' %}" class="btn btn-hero btn-secondary">Log In</a>
+            </div>
+
+            <div class="stats-section">
+                <div class="stat-item">
+                    <div class="stat-number">100+</div>
+                    <div class="stat-label">Specialized Personas</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">∞</div>
+                    <div class="stat-label">Context Retention</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number">24/7</div>
+                    <div class="stat-label">Intelligent Support</div>
+                </div>
+            </div>
+        </div>
+
+        <a href="#features" class="scroll-indicator">
+            <i class="bi bi-chevron-down"></i>
+        </a>
+    </div>
+
+    <!-- Key Features Section -->
+    <div id="features" class="section section-bg-accent">
+        <h2 class="section-title">Why Choose Vorqlus?</h2>
+
+        <div class="feature-grid-detailed">
+            <div class="feature-card-detailed">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-person-video2"></i>
+                </div>
+                <h3 class="feature-card-title">Adaptive Personas</h3>
+                <p class="feature-card-text">
+                    Don't settle for generic responses. Switch instantly between a Coding Expert,
+                    Creative Writer, fitness Coach, or Business Analyst. Vorqlus adapts its tone
+                    and expertise to your specific needs.
+                </p>
+            </div>
+
+            <div class="feature-card-detailed">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-cpu"></i>
+                </div>
+                <h3 class="feature-card-title">Supermemory Core</h3>
+                <p class="feature-card-text">
+                    Unlike other bots that forget you after a reload, Vorqlus builds a long-term
+                    understanding of your projects, preferences, and coding style. It picks up
+                    exactly where you left off.
+                </p>
+            </div>
+
+            <div class="feature-card-detailed">
+                <div class="feature-icon-wrapper">
+                    <i class="bi bi-lightning-charge"></i>
+                </div>
+                <h3 class="feature-card-title">Lightning Fast</h3>
+                <p class="feature-card-text">
+                    Built on advanced architecture for near-instant responses. Whether you're
+                    debugging code or brainstorming ideas, Vorqlus keeps up with your speed
+                    of thought.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="section">
+        <h2 class="section-title">How It Works</h2>
+
+        <div class="steps-container">
+            <div class="steps-line"></div>
+
+            <div class="step-item">
+                <div class="step-content">
+                    <h3 class="step-title">Create Account</h3>
+                    <p class="step-text">Sign up in seconds. Your secure, private workspace is created instantly, ready
+                        to store your interactions.</p>
+                </div>
+                <div class="step-number">1</div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-content">
+                    <h3 class="step-title">Choose Your Guide</h3>
+                    <p class="step-text">Select from our library of specialized AI roles. Need a Python expert? A
+                        marketing guru? Just click to switch context.</p>
+                </div>
+                <div class="step-number">2</div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-content">
+                    <h3 class="step-title">Start Creating</h3>
+                    <p class="step-text">Chat naturally. The AI remembers context, references previous discussions, and
+                        helps you execute complex tasks efficiently.</p>
+                </div>
+                <div class="step-number">3</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- CTA Section -->
+    <div class="section text-center" style="padding-bottom: 0;">
+        <div
+            style="max-width: 800px; margin: 0 auto; background: var(--glass-bg); padding: 4rem; border-radius: 30px; border: 1px solid var(--glass-border);">
+            <h2 class="mb-4">Ready to Upgrade Your Workflow?</h2>
+            <p class="mb-5 text-white-50 fs-5">Join thousands of developers and creators using Vorqlus to supercharge
+                their productivity.</p>
+            <a href="{% url 'register' %}" class="btn btn-hero btn-primary text-white">Join Vorqlus Now</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div>
+                <a href="#" class="footer-brand"><i class="bi bi-robot"></i> VORQLUS</a>
+                <p class="footer-text">
+                    The next generation of AI interaction, designed for continuity,
+                    context, and profound understanding.
+                </p>
+            </div>
+
+            <div class="footer-links">
+                <h4>Product</h4>
+                <ul>
+                    <li><a href="#">Features</a></li>
+                    <li><a href="#">Pricing</a></li>
+                    <li><a href="#">Roadmap</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Resources</h4>
+                <ul>
+                    <li><a href="#">Documentation</a></li>
+                    <li><a href="#">API Reference</a></li>
+                    <li><a href="#">Community</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-links">
+                <h4>Legal</h4>
+                <ul>
+                    <li><a href="#">Privacy Policy</a></li>
+                    <li><a href="#">Terms of Service</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="copyright">
+            &copy; 2025 Vorqlus AI. All rights reserved.
+        </div>
+    </footer>
+</div>
+{% endblock %}

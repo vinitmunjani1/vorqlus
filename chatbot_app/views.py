@@ -86,6 +86,16 @@ def logout_view(request):
     return redirect('login')
 
 
+def landing_page_view(request):
+    """
+    Display the landing page for unauthenticated users.
+    Redirects to dashboard if user is logged in.
+    """
+    if request.user.is_authenticated:
+        return redirect('dashboard')
+    return render(request, 'landing.html')
+
+
 @login_required
 def dashboard_view(request):
     """

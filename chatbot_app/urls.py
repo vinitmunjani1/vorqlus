@@ -15,7 +15,8 @@ urlpatterns = [
     path('logout/', views.logout_view, name='logout'),
     
     # Main URLs
-    path('', views.dashboard_view, name='dashboard'),
+    path('', views.landing_page_view, name='landing'),
+    path('dashboard/', views.dashboard_view, name='dashboard'),
     path('roles/', views.role_selection_view, name='role_selection'),
     path('roles/<int:role_id>/create/', views.create_conversation_view, name='create_conversation'),
     
