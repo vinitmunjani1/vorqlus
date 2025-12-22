@@ -291,11 +291,17 @@ def send_message_view(request, conversation_id):
 
 
 @login_required
+@require_http_methods(["POST"])
 def delete_conversation_view(request, conversation_id):
     """
-    Delete a conversation.
+    Delete a conversation (POST only for security).
     """
-    conversation = get_object_or_404(Conversation, id=conversation_id, user=request.user)
-    conversation.delete()
-    django_messages.success(request, 'Conversation deleted successfully.')
-    return redirect('dashboard')
+    try:
+        conversation = get_object_or_404(Conversation, id=conversation_id, user=request.user)
+        conversation_title = conversation.title
+        conversation.delete()
+        django_messages.success(request, f'Conversation "{conversation_title}" deleted successfully.')
+        return redirect('dashboard')
+    except Exception as e:
+        django_messages.error(request, f'Failed to delete conversation: {str(e)}')
+        return redirect('dashboard')
