@@ -192,6 +192,7 @@ def get_ai_response(conversation, user_message, supermemory_context=None):
         
         response = client.chat.completions.create(
             model=settings.TOGETHER_MODEL_NAME,
+            
             messages=messages
         )
         

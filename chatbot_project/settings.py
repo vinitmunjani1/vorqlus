@@ -182,7 +182,7 @@ LOGOUT_REDIRECT_URL = 'login'
 
 # Together AI Configuration
 TOGETHER_API_KEY = get_env('TOGETHER_API_KEY', default='')
-TOGETHER_MODEL_NAME = get_env('TOGETHER_MODEL_NAME', default='meta-llama/Llama-3.3-70B-Instruct-Turbo')
+TOGETHER_MODEL_NAME = get_env('TOGETHER_MODEL_NAME', default='openai/gpt-oss-120b')#default='meta-llama/Llama-3.3-70B-Instruct-Turbo')
 ROLES_JSON_FILE = BASE_DIR / 'AI_Role_Player_System_Prompts_Formatted.json'
 
 # Supermemory Configuration
