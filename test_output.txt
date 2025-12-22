@@ -1,0 +1,94 @@
+﻿
+============================================================
+SUPERMEMORY INTEGRATION TEST SUITE
+============================================================
+============================================================
+SUPERMEMORY CONFIGURATION TEST
+============================================================
+
+1. SUPERMEMORY_ENABLED: True
+2. SUPERMEMORY_API_KEY: ******************** (configured)
+3. SUPERMEMORY_NAMESPACE: local
+
+============================================================
+CLIENT INITIALIZATION TEST
+============================================================
+python : Traceback (most 
+recent call last):
+At line:1 char:1
++ python test_supermemory.py 
+2>&1 | Out-File -FilePath 
+test_output.txt  ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~
+    + CategoryInfo           
+   : NotSpecified: (Traceba  
+  ck (most recent call las   
+ t)::String) [], RemoteEx    
+ception
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+  File "C:\vmgithub\chatbot\t
+est_supermemory.py", line 
+56, in 
+test_client_initialization
+    print("\n\u2705 
+Supermemory client 
+initialized successfully!")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^
+  File "C:\Python314\Lib\enco
+dings\cp1252.py", line 19, 
+in encode
+    return codecs.charmap_enc
+ode(input,self.errors,encodin
+g_table)[0]
+           ~~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^
+UnicodeEncodeError: 
+'charmap' codec can't encode 
+character '\u2705' in 
+position 2: character maps 
+to <undefined>
+
+During handling of the above 
+exception, another exception 
+occurred:
+
+Traceback (most recent call 
+last):
+  File "C:\vmgithub\chatbot\t
+est_supermemory.py", line 
+256, in <module>
+    main()
+    ~~~~^^
+  File "C:\vmgithub\chatbot\t
+est_supermemory.py", line 
+223, in main
+    client_ok = 
+test_client_initialization()
+  File "C:\vmgithub\chatbot\t
+est_supermemory.py", line 
+67, in 
+test_client_initialization
+    print(f"\n\u274c Error 
+initializing client: {e}")
+    ~~~~~^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^
+  File "C:\Python314\Lib\enco
+dings\cp1252.py", line 19, 
+in encode
+    return codecs.charmap_enc
+ode(input,self.errors,encodin
+g_table)[0]
+           ~~~~~~~~~~~~~~~~~~
+~~~^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^
+UnicodeEncodeError: 
+'charmap' codec can't encode 
+character '\u274c' in 
+position 2: character maps 
+to <undefined>

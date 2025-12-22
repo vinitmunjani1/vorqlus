@@ -55,6 +55,7 @@ def get_client():
     return initialize_supermemory_client()
 
 
+def _get_user_container_tag(user_id):
     """Get container tag for user-specific memories."""
     namespace = getattr(settings, 'SUPERMEMORY_NAMESPACE', 'default')
     # Use UUID from profile if available, fallback to ID
@@ -66,6 +67,7 @@ def get_client():
     return f"{namespace}_user_{user_identifier}"
 
 
+def _get_conversation_container_tag(user_id, conversation_id):
     """Get container tag for conversation-specific memories."""
     namespace = getattr(settings, 'SUPERMEMORY_NAMESPACE', 'default')
     # Use UUID from profile if available, fallback to ID
@@ -77,6 +79,7 @@ def get_client():
     return f"{namespace}_user_{user_identifier}_conv_{conversation_id}"
 
 
+def _get_preferences_container_tag(user_id):
     """Get container tag for user preferences."""
     namespace = getattr(settings, 'SUPERMEMORY_NAMESPACE', 'default')
     try:
