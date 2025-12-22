@@ -427,8 +427,26 @@
     }
 
     @media (max-width: 768px) {
+
+        /* Mobile Performance Optimizations */
+        .hero-bg-glow {
+            display: none;
+            /* Hide heavy animation on mobile */
+        }
+
+        .hero-badge,
+        .step-content,
+        .feature-card-detailed {
+            backdrop-filter: none !important;
+            /* Disable expensive blur */
+            background: rgba(20, 25, 45, 0.95) !important;
+            /* Solid background fallback */
+        }
+
         .hero-title {
             font-size: 3rem;
+            animation: none !important;
+            /* Disable text animation */
         }
 
         .steps-line {
@@ -445,6 +463,8 @@
         .step-number {
             margin: 0 1rem 0 0;
             min-width: 50px;
+            box-shadow: none !important;
+            /* Remove shadow for perf */
         }
 
         .step-content {
@@ -453,6 +473,13 @@
 
         .feature-grid-detailed {
             grid-template-columns: 1fr;
+        }
+
+        /* Disable other animations for smoothness */
+        * {
+            animation-duration: 0s !important;
+            animation: none !important;
+            transition: none !important;
         }
     }
 </style>
@@ -465,7 +492,7 @@
         <div class="hero-bg-glow"></div>
 
         <div class="hero-content">
-            <div class="hero-badge">Alpha Access Available</div>
+           
             <h1 class="hero-title">Your Second Brain <br>Powered by <span class="hero-accent">Intelligent AI</span></h1>
             <p class="hero-subtitle">
                 Vorqlus isn't just a chatbot. It's a persistent, memory-enhanced AI companion that evolves with you.
