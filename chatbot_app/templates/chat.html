@@ -181,6 +181,7 @@
         if (loadingIndicator) loadingIndicator.classList.add('active');
         scrollToBottom();
 
+        const startTime = performance.now();
         try {
             // Send message to server
             const csrfToken = getCookie('csrftoken');
@@ -205,9 +206,22 @@
 
             const data = await response.json();
 
+            const endTime = performance.now();
+            const roundTripTime = (endTime - startTime) / 1000;
+
+            console.log(`--- Performance Breakdown ---`);
+            console.log(`Total Round-trip: ${roundTripTime.toFixed(4)}s`);
+            if (data.timings) {
+                console.log(`Server Total: ${data.timings.total.toFixed(4)}s`);
+                console.log(`  └─ Supermemory: ${data.timings.supermemory.toFixed(4)}s`);
+                console.log(`  └─ Together AI: ${data.timings.ai.toFixed(4)}s`);
+                console.log(`Network Latency: ${(roundTripTime - data.timings.total).toFixed(4)}s`);
+            }
+            console.log(`-----------------------------`);
+
             if (data.success) {
-                // Add AI response to chat
-                addMessageToChat('assistant', data.ai_message.content);
+                // Add AI response to chat with timings
+                addMessageToChat('assistant', data.ai_message.content, data.timings);
             } else {
                 // Show error message
                 addMessageToChat('assistant', 'Error: ' + (data.error || 'Failed to get response'));
@@ -228,7 +242,7 @@
         }
     }
 
-    function addMessageToChat(role, content) {
+    function addMessageToChat(role, content, timings = null) {
         console.log('Adding message:', role, content);
         const chatMessages = document.getElementById('chat-messages');
 
@@ -274,7 +288,14 @@
             formattedContent = escapedContent.replace(/\n/g, '<br>');
         }
 
-        messageDiv.innerHTML = `<div><div class="message-bubble">${formattedContent}</div><div class="message-time">${timeString}</div></div>`;
+        let timingHtml = '';
+        if (timings && timings.supermemory !== undefined) {
+            timingHtml = `<span class="ms-2 opacity-50" style="font-size: 0.75rem;" title="Total: ${timings.total.toFixed(2)}s | AI: ${timings.ai.toFixed(2)}s">
+                <i class="bi bi-memory"></i> Supermemory: ${timings.supermemory.toFixed(3)}s
+            </span>`;
+        }
+
+        messageDiv.innerHTML = `<div><div class="message-bubble">${formattedContent}</div><div class="message-time">${timeString}${timingHtml}</div></div>`;
 
         // Insert before loading indicator
         const loadingIndicator = document.getElementById('loading-indicator');

@@ -9,6 +9,12 @@ from django.contrib import messages as django_messages
 from django.http import JsonResponse
 from django.views.decorators.http import require_http_methods
 import json
+import time
+import logging
+from concurrent.futures import ThreadPoolExecutor
+
+executor = ThreadPoolExecutor(max_workers=5)
+logger = logging.getLogger(__name__)
 
 from .models import AIRole, Conversation, Message
 from .forms import UserRegistrationForm, MessageForm
@@ -198,11 +204,16 @@ def send_message_view(request, conversation_id):
     """
     AJAX endpoint to send a message and get AI response.
     """
+    start_total = time.perf_counter()
+    logger.info(f"--- Starting message processing for conversation {conversation_id} ---")
+    
     conversation = get_object_or_404(Conversation, id=conversation_id, user=request.user)
     
     try:
+        t0 = time.perf_counter()
         data = json.loads(request.body)
         user_message = data.get('message', '').strip()
+        logger.info(f"Step: JSON parsing took {time.perf_counter() - t0:.4f}s")
         
         if not user_message:
             return JsonResponse({'error': 'Message cannot be empty'}, status=400)
@@ -211,33 +222,39 @@ def send_message_view(request, conversation_id):
         is_first_message = conversation.messages.count() == 0
         
         # Save user message
+        t0 = time.perf_counter()
         user_msg = Message.objects.create(
             conversation=conversation,
             role='user',
             content=user_message
         )
+        logger.info(f"Step: DB save user message took {time.perf_counter() - t0:.4f}s")
         
-        # Store user message in Supermemory
+        # Store user message in Supermemory (BACKGROUND)
+        sm_time = 0
         try:
-            store_conversation_memory(
+            # We don't wait for this to finish
+            executor.submit(
+                store_conversation_memory,
                 request.user,
                 conversation,
                 user_message,
-                role='user'
+                'user'
             )
+            logger.info("Step: Supermemory store user message (queued to background)")
         except Exception as e:
-            # Log error but continue - Supermemory is optional
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Failed to store user message in Supermemory: {e}")
+            logger.warning(f"Failed to queue user message storage: {e}")
         
         # Update conversation title if this was the first message
         if is_first_message:
+            t0 = time.perf_counter()
             conversation.title = create_conversation_title(user_message)
             conversation.save()
+            logger.info(f"Step: Update conversation title took {time.perf_counter() - t0:.4f}s")
         
         # Get enhanced context from Supermemory
         supermemory_context = None
+        t0 = time.perf_counter()
         try:
             supermemory_context = get_enhanced_context(
                 request.user,
@@ -246,41 +263,51 @@ def send_message_view(request, conversation_id):
                 include_profile=True,
                 include_conversation=True
             )
+            dur = time.perf_counter() - t0
+            sm_time += dur
+            logger.info(f"Step: Supermemory retrieve context took {dur:.4f}s")
         except Exception as e:
             # Log error but continue - Supermemory is optional
-            import logging
-            logger = logging.getLogger(__name__)
             logger.warning(f"Failed to retrieve Supermemory context: {e}")
         
         # Get AI response
+        ai_time = 0
+        t0 = time.perf_counter()
         try:
             ai_response = get_ai_response(conversation, user_message, supermemory_context)
+            ai_time = time.perf_counter() - t0
+            logger.info(f"Step: AI response generation (Together AI API) took {ai_time:.4f}s")
         except Exception as e:
             return JsonResponse({'error': f'Failed to get AI response: {str(e)}'}, status=500)
         
         # Save AI response
+        t0 = time.perf_counter()
         ai_msg = Message.objects.create(
             conversation=conversation,
             role='assistant',
             content=ai_response
         )
+        logger.info(f"Step: DB save AI response took {time.perf_counter() - t0:.4f}s")
         
-        # Store assistant response in Supermemory
+        # Store assistant response in Supermemory (BACKGROUND)
         try:
-            store_conversation_memory(
+            # We don't wait for this to finish
+            executor.submit(
+                store_conversation_memory,
                 request.user,
                 conversation,
                 ai_response,
-                role='assistant'
+                'assistant'
             )
+            logger.info("Step: Supermemory store assistant response (queued to background)")
         except Exception as e:
-            # Log error but continue - Supermemory is optional
-            import logging
-            logger = logging.getLogger(__name__)
-            logger.warning(f"Failed to store assistant message in Supermemory: {e}")
+            logger.warning(f"Failed to queue assistant message storage: {e}")
         
         # Update conversation timestamp
         conversation.save()
+        
+        total_time = time.perf_counter() - start_total
+        logger.info(f"--- TOTAL PROCESSING TIME: {total_time:.4f}s ---")
         
         return JsonResponse({
             'success': True,
@@ -291,12 +318,18 @@ def send_message_view(request, conversation_id):
             'ai_message': {
                 'content': ai_msg.content,
                 'timestamp': ai_msg.timestamp.isoformat(),
+            },
+            'timings': {
+                'total': total_time,
+                'supermemory': sm_time,
+                'ai': ai_time
             }
         })
         
     except json.JSONDecodeError:
         return JsonResponse({'error': 'Invalid JSON'}, status=400)
     except Exception as e:
+        logger.exception("Unexpected error in send_message_view")
         return JsonResponse({'error': str(e)}, status=500)
 
 

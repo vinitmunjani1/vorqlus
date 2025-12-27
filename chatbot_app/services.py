@@ -5,6 +5,7 @@ Extracted and adapted from pilot.py for Django integration.
 
 import json
 import logging
+import time
 from pathlib import Path
 from django.conf import settings
 from together import Together
@@ -187,14 +188,17 @@ def get_ai_response(conversation, user_message, supermemory_context=None):
         Exception: If API call fails
     """
     try:
+        t_init = time.perf_counter()
         client = initialize_together_client()
         messages = build_messages_for_api(conversation, user_message, supermemory_context)
         
+        t0 = time.perf_counter()
         response = client.chat.completions.create(
             model=settings.TOGETHER_MODEL_NAME,
-            
             messages=messages
         )
+        t_api = time.perf_counter() - t0
+        logger.info(f"Together AI API call took {t_api:.4f}s")
         
         ai_response = response.choices[0].message.content
         return ai_response

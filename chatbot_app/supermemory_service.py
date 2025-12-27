@@ -4,6 +4,8 @@ conversation history, and preferences.
 """
 
 import logging
+import time
+from concurrent.futures import ThreadPoolExecutor
 from django.conf import settings
 from .models import User, Conversation, Message, AIRole
 
@@ -114,32 +116,29 @@ def store_conversation_memory(user, conversation, message, role='user'):
     if not client:
         return False
     
+    start_time = time.perf_counter()
     try:
         # Format message with metadata
         content = f"[{role.upper()}] {message}"
         
-        # Store at USER level for cross-conversation memory retrieval
+        # Tags for indexing
         user_container_tag = _get_user_container_tag(user.id)
-        try:
-            client.add(
-                content=content,
-                container_tag=user_container_tag
-            )
-            logger.debug(f"Stored {role} message in Supermemory at user level for user {user.id}")
-        except Exception as api_error:
-            logger.warning(f"Supermemory API error during user-level memory storage: {api_error}")
-        
-        # Also store at conversation level for conversation-specific context
         conv_container_tag = _get_conversation_container_tag(user.id, conversation.id)
-        try:
-            client.add(
-                content=content,
-                container_tag=conv_container_tag
-            )
-            logger.debug(f"Stored {role} message in Supermemory for conversation {conversation.id}")
-        except Exception as api_error:
-            logger.warning(f"Supermemory API error during conversation-level memory storage: {api_error}")
         
+        # We can run these in parallel to save time
+        def add_to_sm(tag, scope):
+            try:
+                client.add(content=content, container_tag=tag)
+                logger.debug(f"Stored {role} message in Supermemory at {scope} level")
+            except Exception as api_error:
+                logger.warning(f"Supermemory API error ({scope}): {api_error}")
+
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            executor.submit(add_to_sm, user_container_tag, "user")
+            executor.submit(add_to_sm, conv_container_tag, "conversation")
+        
+        duration = time.perf_counter() - start_time
+        logger.info(f"Supermemory parallel store operation took {duration:.4f}s")
         return True
     except Exception as e:
         logger.error(f"Failed to store conversation memory: {e}")
@@ -225,6 +224,7 @@ def search_memories(user, query, limit=5, container_tag=None):
     if not client:
         return []
     
+    start_time = time.perf_counter()
     try:
         # Handle API errors gracefully
         try:
@@ -238,6 +238,9 @@ def search_memories(user, query, limit=5, container_tag=None):
         except Exception as api_error:
             logger.warning(f"Supermemory API error during search: {api_error}")
             return []
+        
+        duration = time.perf_counter() - start_time
+        logger.info(f"Supermemory search for query '{query[:20]}...' took {duration:.4f}s")
         
         # Extract results from the response object
         results = []
@@ -476,26 +479,34 @@ def get_enhanced_context(user, conversation, query, include_profile=True, includ
     Returns:
         str: Formatted context string to enhance system prompt
     """
+    start_time = time.perf_counter()
     context_parts = []
     
-    # Get user profile
-    if include_profile:
-        profile = get_user_profile(user, query)
-        if profile.get('static'):
-            context_parts.append(f"User Profile (Static): {profile['static']}")
-        if profile.get('dynamic'):
-            context_parts.append(f"User Profile (Dynamic): {profile['dynamic']}")
+    with ThreadPoolExecutor(max_workers=3) as executor:
+        # Define tasks
+        profile_future = executor.submit(get_user_profile, user, query) if include_profile else None
+        conv_future = executor.submit(get_conversation_context, conversation, query, 10) if include_conversation else None
+        user_ctx_future = executor.submit(get_user_context, user, query, 5)
+        
+        # Collect results
+        if profile_future:
+            profile = profile_future.result()
+            if profile.get('static'):
+                context_parts.append(f"User Profile (Static): {profile['static']}")
+            if profile.get('dynamic'):
+                context_parts.append(f"User Profile (Dynamic): {profile['dynamic']}")
+        
+        if conv_future:
+            conv_context = conv_future.result()
+            if conv_context:
+                context_parts.append(f"Previous Conversation Context:\n{conv_context}")
+        
+        user_context = user_ctx_future.result()
+        if user_context:
+            context_parts.append(f"Relevant User History:\n{user_context}")
     
-    # Get conversation context
-    if include_conversation:
-        conv_context = get_conversation_context(conversation, query, limit=10)
-        if conv_context:
-            context_parts.append(f"Previous Conversation Context:\n{conv_context}")
-    
-    # Get general user context
-    user_context = get_user_context(user, query, limit=5)
-    if user_context:
-        context_parts.append(f"Relevant User History:\n{user_context}")
+    duration = time.perf_counter() - start_time
+    logger.info(f"Parallel context retrieval took {duration:.4f}s")
     
     if context_parts:
         return "\n\n".join(context_parts)
